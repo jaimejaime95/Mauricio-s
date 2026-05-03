@@ -1,0 +1,54 @@
+export const categories = [
+  {
+    name: "Digital Painting & Illustration",
+    sub: ["Concept Art", "Character Design", "Portraits", "Landscapes", "Comics", "Storyboarding", "Matte Painting", "Fan Art"]
+  },
+  {
+    name: "Vector Art",
+    sub: ["Logos", "Icons", "Infographics", "Typography", "Flat Illustration", "Patterns", "UI/UX Elements"]
+  },
+  {
+    name: "3D Art & Modeling",
+    sub: ["Modeling", "Sculpting", "Texturing", "Architecture", "Product Renders", "Animation Assets", "VR Environments"]
+  },
+  {
+    name: "Animation",
+    sub: ["2D", "3D", "Motion Graphics", "Stop Motion", "GIFs", "Cinematics", "VFX"]
+  },
+  {
+    name: "Generative Art",
+    sub: ["AI Art", "Fractals", "Procedural", "Interactive Code Art"]
+  },
+  {
+    name: "Photography",
+    sub: ["Digital Photography", "Composites", "Retouching", "Cinemagraphs", "HDR", "360 VR"]
+  },
+  {
+    name: "Pixel Art",
+    sub: ["Sprites", "Pixel Animation", "Isometric", "Icons", "ASCII Art"]
+  },
+  {
+    name: "Interactive Art",
+    sub: ["Games", "Web Art", "AR/VR", "Installations", "Storytelling"]
+  },
+  {
+    name: "Motion & Video",
+    sub: ["Experimental", "Typography", "Music Visuals", "Short Films", "Mashups"]
+  },
+  {
+    name: "Graphic Design",
+    sub: ["Posters", "Branding", "Packaging", "Ads", "Editorial"]
+  },
+  {
+    name: "Conceptual Art",
+    sub: ["Net Art", "Creative Coding", "Data Art", "Performance"]
+  },
+  {
+    name: "Sound-Integrated Art",
+    sub: ["Audio Reactive", "Music Visuals", "Generative Sound Art"]
+  },
+  {
+    name: "Mixed Media",
+    sub: ["Photo + Paint", "Hybrid 2D/3D", "Collage", "Interactive Narratives"]
+  }
+];
