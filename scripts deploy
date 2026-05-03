@@ -1,0 +1,9 @@
+async function main() {
+  const Marketplace = await ethers.getContractFactory("MauriciosMarketplace");
+  const market = await Marketplace.deploy();
+  await market.deployed();
+
+  console.log("Marketplace deployed:", market.address);
+}
+
+main().catch(console.error);
