@@ -1,0 +1,14 @@
+async function importAndList(nftAddress, tokenId, price, signer) {
+  const contract = new ethers.Contract(
+    MARKETPLACE_ADDRESS,
+    MARKETPLACE_ABI,
+    signer
+  );
+
+  // NFT must be approved first
+  const nft = new ethers.Contract(nftAddress, ERC721_ABI, signer);
+
+  await nft.approve(MARKETPLACE_ADDRESS, tokenId);
+
+  await contract.list(nftAddress, tokenId, price);
+}
