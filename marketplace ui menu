@@ -1,0 +1,18 @@
+import { categories } from "../data/categories";
+
+export default function Sidebar() {
+  return (
+    <div>
+      {categories.map(cat => (
+        <div key={cat.name}>
+          <h3>{cat.name}</h3>
+          <ul>
+            {cat.sub.map(sub => (
+              <li key={sub}>{sub}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
