@@ -1,0 +1,74 @@
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
+contract NFTAuction {
+
+    struct Auction {
+        address seller;
+        address nft;
+        uint256 tokenId;
+        uint256 highestBid;
+        address highestBidder;
+        uint256 endTime;
+        bool ended;
+    }
+
+    uint256 public platformFee = 25; // 2.5%
+    address public feeWallet = 0x6d9C6d940A61d95BD0d65C968ab42b2f11e7027b;
+
+    mapping(uint256 => Auction) public auctions;
+    uint256 public auctionCount;
+
+    event NewBid(uint256 id, address bidder, uint256 amount);
+    event AuctionEnded(uint256 id, address winner, uint256 amount);
+
+    function createAuction(address nft, uint256 tokenId, uint256 duration) external {
+        IERC721(nft).transferFrom(msg.sender, address(this), tokenId);
+
+        auctions[auctionCount] = Auction(
+            msg.sender,
+            nft,
+            tokenId,
+            0,
+            address(0),
+            block.timestamp + duration,
+            false
+        );
+
+        auctionCount++;
+    }
+
+    function bid(uint256 id) external payable {
+        Auction storage a = auctions[id];
+        require(block.timestamp < a.endTime, "Ended");
+        require(msg.value > a.highestBid, "Low bid");
+
+        if (a.highestBidder != address(0)) {
+            payable(a.highestBidder).transfer(a.highestBid);
+        }
+
+        a.highestBid = msg.value;
+        a.highestBidder = msg.sender;
+
+        emit NewBid(id, msg.sender, msg.value);
+    }
+
+    function finalize(uint256 id) external {
+        Auction storage a = auctions[id];
+        require(block.timestamp >= a.endTime, "Not ended");
+        require(!a.ended, "Already done");
+
+        a.ended = true;
+
+        uint256 fee = (a.highestBid * platformFee) / 1000;
+        uint256 seller = a.highestBid - fee;
+
+        payable(a.seller).transfer(seller);
+        payable(feeWallet).transfer(fee);
+
+        IERC721(a.nft).transferFrom(address(this), a.highestBidder, a.tokenId);
+
+        emit AuctionEnded(id, a.highestBidder, a.highestBid);
+    }
+}
