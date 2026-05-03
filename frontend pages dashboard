@@ -1,0 +1,28 @@
+import { useEffect, useState } from "react";
+
+export default function Dashboard() {
+  const [wallet, setWallet] = useState("");
+
+  useEffect(() => {
+    async function connect() {
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts"
+      });
+      setWallet(accounts[0]);
+    }
+    connect();
+  }, []);
+
+  return (
+    <div>
+      <h1>Private Portal</h1>
+      <p>Wallet: {wallet}</p>
+
+      <h2>Your NFTs</h2>
+      <div id="nft-list"></div>
+
+      <h2>Crypto Balance</h2>
+      <div id="balance"></div>
+    </div>
+  );
+}
