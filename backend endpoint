@@ -1,0 +1,22 @@
+app.post("/api/sync-nfts", async (req, res) => {
+  const { wallet } = req.body;
+
+  const nftContracts = [
+    "0x...collection1",
+    "0x...collection2"
+  ];
+
+  let allNFTs = [];
+
+  for (const contract of nftContracts) {
+    const nfts = await fetchNFTs(
+      wallet,
+      contract,
+      process.env.POLYGON_RPC
+    );
+
+    allNFTs.push(...nfts);
+  }
+
+  res.json(allNFTs);
+});
