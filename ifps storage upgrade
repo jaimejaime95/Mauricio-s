@@ -1,0 +1,12 @@
+import axios from "axios";
+
+export async function uploadToIPFS(fileOrJson) {
+  const url = typeof fileOrJson === "string" ? "pinFileToIPFS" : "pinJSONToIPFS";
+  const res = await axios.post(`https://api.pinata.cloud/pinning/${url}`, fileOrJson, {
+    headers: {
+      pinata_api_key: process.env.PINATA_KEY,
+      pinata_secret_api_key: process.env.PINATA_SECRET
+    }
+  });
+  return `ipfs://${res.data.IpfsHash}`;
+}
