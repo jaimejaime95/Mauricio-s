@@ -1,0 +1,11 @@
+{
+  "name": "Artwork Title",
+  "description": "Description",
+  "image": "ipfs://...",
+  "attributes": [
+    {
+      "trait_type": "Style",
+      "value": "Cyberpunk"
+    }
+  ]
+}
