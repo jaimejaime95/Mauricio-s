@@ -1,0 +1,18 @@
+const OpenAI = require("openai");
+const express = require("express");
+const app = express();
+app.use(express.json());
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_KEY });
+
+app.post("/generate-nft", async (req, res) => {
+  const { prompt } = req.body;
+  const image = await openai.images.generate({
+    model: "gpt-image-1",
+    prompt,
+    size: "1024x1024"
+  });
+  res.json({ url: image.data[0].url });
+});
+
+app.listen(5000, () => console.log("AI Generator Running"));
