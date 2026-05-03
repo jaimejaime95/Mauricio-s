@@ -1,0 +1,20 @@
+import { categories } from "../data/categories";
+
+export default function Sidebar() {
+  return (
+    <div style={{ width: 300 }}>
+      <h2>MAURICIO’S MARKETPLACE</h2>
+
+      {categories.map((c) => (
+        <div key={c.name}>
+          <h4>{c.name}</h4>
+          <ul>
+            {c.sub.map((s) => (
+              <li key={s}>{s}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
