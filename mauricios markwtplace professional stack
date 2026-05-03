@@ -1,0 +1,50 @@
+mauricios-marketplace/
+│
+├── contracts/
+│   ├── Marketplace.sol
+│   ├── FractionalNFT.sol
+│   ├── NFTAuction.sol
+│   ├── RoyaltyEngine.sol
+│   ├── DisputeDAO.sol
+│   ├── MarketplaceToken.sol
+│   └── Staking.sol
+│
+├── backend/
+│   ├── server.js
+│   ├── syncNFTs.js
+│   ├── fraudScoring.js
+│   ├── aiGenerator.js
+│   ├── tokenomics.js
+│   └── pinataUploader.js
+│
+├── frontend/
+│   ├── pages/
+│   │   ├── index.js
+│   │   ├── dashboard.js
+│   │   ├── auctions.js
+│   │   ├── createNFT.js
+│   │   └── wallet.js
+│   ├── components/
+│   │   ├── Sidebar.js
+│   │   ├── Marketplace.js
+│   │   ├── AuctionList.js
+│   │   └── NFTCard.js
+│   └── utils/
+│       ├── blockchain.js
+│       └── ipfs.js
+│
+├── mobile/
+│   ├── App.js
+│   ├── screens/
+│   │   ├── Home.js
+│   │   ├── Marketplace.js
+│   │   ├── Wallet.js
+│   │   ├── CreateNFT.js
+│   │   └── Auctions.js
+│
+├── scripts/
+│   ├── deploy.js
+│   └── deployToken.js
+│
+├── hardhat.config.js
+└── package.json
