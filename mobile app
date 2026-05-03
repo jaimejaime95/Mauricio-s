@@ -1,0 +1,7 @@
+mobile/
+  App.js
+  screens/
+    Home.js
+    Marketplace.js
+    CreateNFT.js
+    Wallet.js
