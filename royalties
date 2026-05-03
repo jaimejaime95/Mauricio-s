@@ -1,0 +1,28 @@
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/interfaces/IERC2981.sol";
+
+contract RoyaltyEngine is IERC2981 {
+
+    struct RoyaltyInfo {
+        address creator;
+        uint96 royaltyFraction; // e.g. 500 = 5%
+    }
+
+    mapping(uint256 => RoyaltyInfo) public royalties;
+
+    function setRoyalty(uint256 tokenId, address creator, uint96 fraction) external {
+        royalties[tokenId] = RoyaltyInfo(creator, fraction);
+    }
+
+    function royaltyInfo(uint256 tokenId, uint256 salePrice)
+        external
+        view
+        override
+        returns (address, uint256)
+    {
+        RoyaltyInfo memory r = royalties[tokenId];
+        uint256 amount = (salePrice * r.royaltyFraction) / 10000;
+        return (r.creator, amount);
+    }
+}
