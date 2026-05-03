@@ -1,0 +1,28 @@
+import { useEffect, useState } from "react";
+
+export default function Dashboard() {
+  const [wallet, setWallet] = useState(null);
+  const [nfts, setNfts] = useState([]);
+
+  useEffect(() => {
+    async function load() {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      setWallet(accounts[0]);
+
+      // fetch NFTs from contract or API
+    }
+    load();
+  }, []);
+
+  return (
+    <div>
+      <h1>MAURICIO’S MARKETPLACE Dashboard</h1>
+      <p>Wallet: {wallet}</p>
+
+      <h2>Your NFTs</h2>
+      {nfts.map(nft => (
+        <div key={nft.id}>{nft.name}</div>
+      ))}
+    </div>
+  );
+}
