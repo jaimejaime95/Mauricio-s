@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
+contract MauriciosMarketplace {
+
+    address public feeWallet = 0x6d9C6d940A61d95BD0d65C968ab42b2f11e7027b;
+    uint256 public feePercent = 25; // 2.5% = 25 / 1000
+
+    struct Listing {
+        address seller;
+        address nftContract;
+        uint256 tokenId;
+        uint256 price;
+        bool active;
+    }
+
+    mapping(uint256 => Listing) public listings;
+    uint256 public listingCount;
+
+    event Listed(uint256 id, address seller, uint256 price);
+    event Purchased(uint256 id, address buyer);
+
+    function listItem(
+        address nftContract,
+        uint256 tokenId,
+        uint256 price
+    ) external {
+        IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
+
+        listings[listingCount] = Listing(
+            msg.sender,
+            nftContract,
+            tokenId,
+            price,
+            true
+        );
+
+        emit Listed(listingCount, msg.sender, price);
+        listingCount++;
+    }
+
+    function buyItem(uint256 id) external payable {
+        Listing storage item = listings[id];
+        require(item.active, "Not active");
+        require(msg.value >= item.price, "Not enough ETH");
+
+        item.active = false;
+
+        uint256 fee = (msg.value * feePercent) / 1000;
+        uint256 sellerAmount = msg.value - fee;
+
+        payable(item.seller).transfer(sellerAmount);
+        payable(feeWallet).transfer(fee);
+
+        IERC721(item.nftContract).transferFrom(address(this), msg.sender, item.tokenId);
+
+        emit Purchased(id, msg.sender);
+    }
+}
