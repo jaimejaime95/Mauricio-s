@@ -1,0 +1,248 @@
+/**
+ * MAURICIO’S MARKETPLACE — CORE ORCHESTRATION SYSTEM
+ * Web3 Marketplace + Escrow + Auctions + AI NFTs + Fractionalization
+ * + DAO disputes + staking + fraud scoring + OpenSea import
+ */
+
+const { ethers } = require("ethers");
+const express = require("express");
+const OpenAI = require("openai");
+const axios = require("axios");
+
+const app = express();
+app.use(express.json());
+
+/* =========================
+   CONFIG
+========================= */
+
+const CONFIG = {
+  feeWallet: "0x6d9C6d940A61d95BD0d65C968ab42b2f11e7027b",
+  feeRate: 25, // 2.5%
+  rpc: process.env.POLYGON_RPC,
+  privateKey: process.env.PRIVATE_KEY
+};
+
+const provider = new ethers.JsonRpcProvider(CONFIG.rpc);
+const wallet = new ethers.Wallet(CONFIG.privateKey, provider);
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_KEY });
+
+/* =========================
+   NFT IMPORT (OpenSea-compatible)
+========================= */
+
+async function fetchNFTs(owner, nftContract) {
+  const abi = [
+    "function balanceOf(address) view returns (uint256)",
+    "function tokenOfOwnerByIndex(address,uint256) view returns (uint256)",
+    "function tokenURI(uint256) view returns (string)"
+  ];
+
+  const contract = new ethers.Contract(nftContract, abi, provider);
+
+  const balance = await contract.balanceOf(owner);
+  const results = [];
+
+  for (let i = 0; i < balance; i++) {
+    const tokenId = await contract.tokenOfOwnerByIndex(owner, i);
+    const uri = await contract.tokenURI(tokenId);
+    results.push({ tokenId: tokenId.toString(), uri });
+  }
+
+  return results;
+}
+
+/* =========================
+   FRAUD SCORING ENGINE
+========================= */
+
+function trustScore(user) {
+  let score = 100;
+  if (user.disputes > 3) score -= 30;
+  if (user.failedTxs > 2) score -= 20;
+  if (user.age < 7) score -= 15;
+  if (user.verified) score += 10;
+  return Math.max(0, Math.min(100, score));
+}
+
+/* =========================
+   AI NFT GENERATION
+========================= */
+
+app.post("/ai/generate", async (req, res) => {
+  const { prompt } = req.body;
+
+  const image = await openai.images.generate({
+    model: "gpt-image-1",
+    prompt,
+    size: "1024x1024"
+  });
+
+  res.json({ image: image.data[0].url });
+});
+
+/* =========================
+   NFT IMPORT (OpenSea WALLET SYNC)
+========================= */
+
+app.post("/wallet/sync", async (req, res) => {
+  const { walletAddress, contracts } = req.body;
+
+  let all = [];
+
+  for (const c of contracts) {
+    const nfts = await fetchNFTs(walletAddress, c);
+    all.push(...nfts);
+  }
+
+  res.json({ nfts: all });
+});
+
+/* =========================
+   MARKETPLACE LISTING (ESCROW LOGIC)
+========================= */
+
+const listings = [];
+
+app.post("/marketplace/list", async (req, res) => {
+  const { seller, nft, tokenId, price } = req.body;
+
+  listings.push({
+    seller,
+    nft,
+    tokenId,
+    price,
+    active: true
+  });
+
+  res.json({ success: true, listings });
+});
+
+/* =========================
+   PURCHASE (ESCROW SIMULATION)
+========================= */
+
+app.post("/marketplace/buy", async (req, res) => {
+  const { buyer, listingId, value } = req.body;
+
+  const item = listings[listingId];
+  if (!item || !item.active) return res.status(400).send("Invalid");
+
+  const fee = (value * CONFIG.feeRate) / 1000;
+  const sellerAmount = value - fee;
+
+  item.active = false;
+
+  res.json({
+    sellerPaid: sellerAmount,
+    feePaid: fee,
+    feeWallet: CONFIG.feeWallet
+  });
+});
+
+/* =========================
+   AUCTION SYSTEM
+========================= */
+
+const auctions = [];
+
+app.post("/auction/create", (req, res) => {
+  const { seller, nft, tokenId, duration } = req.body;
+
+  auctions.push({
+    seller,
+    nft,
+    tokenId,
+    highestBid: 0,
+    highestBidder: null,
+    endTime: Date.now() + duration,
+    ended: false
+  });
+
+  res.json({ auctions });
+});
+
+app.post("/auction/bid", (req, res) => {
+  const { id, bidder, amount } = req.body;
+
+  const a = auctions[id];
+  if (!a || a.ended) return res.status(400).send("Invalid");
+
+  if (amount <= a.highestBid) return res.status(400).send("Too low");
+
+  a.highestBid = amount;
+  a.highestBidder = bidder;
+
+  res.json(a);
+});
+
+/* =========================
+   FRACTIONAL NFT LOGIC
+========================= */
+
+const fractional = {};
+
+app.post("/fractional/mint", (req, res) => {
+  const { nftId, shares, owner } = req.body;
+
+  fractional[nftId] = {
+    owner,
+    shares,
+    distributed: true
+  };
+
+  res.json(fractional[nftId]);
+});
+
+/* =========================
+   DAO DISPUTE SYSTEM
+========================= */
+
+const disputes = [];
+
+app.post("/dispute/create", (req, res) => {
+  const { buyer, seller, amount } = req.body;
+
+  disputes.push({
+    buyer,
+    seller,
+    amount,
+    buyerVotes: 0,
+    sellerVotes: 0,
+    resolved: false
+  });
+
+  res.json(disputes);
+});
+
+/* =========================
+   STAKING SYSTEM (SIMPLIFIED)
+========================= */
+
+const stakes = {};
+
+app.post("/stake", (req, res) => {
+  const { user, amount } = req.body;
+
+  stakes[user] = (stakes[user] || 0) + amount;
+
+  res.json(stakes);
+});
+
+/* =========================
+   FRAUD SCORING API
+========================= */
+
+app.post("/trust", (req, res) => {
+  const score = trustScore(req.body);
+  res.json({ score });
+});
+
+/* =========================
+   START SERVER
+========================= */
+
+app.listen(5000, () => {
+  console.log("MAURICIO MARKETPLACE CORE RUNNING");
+});
