@@ -1,0 +1,28 @@
+const express = require("express");
+const Stripe = require("stripe");
+const { ethers } = require("ethers");
+
+const app = express();
+app.use(express.json());
+
+const stripe = Stripe(process.env.STRIPE_KEY);
+
+// Polygon provider
+const provider = new ethers.JsonRpcProvider(process.env.POLYGON_RPC);
+const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+
+// ⚡ Stripe fiat → blockchain bridge
+app.post("/webhook/stripe", async (req, res) => {
+  const event = req.body;
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+
+    // Example: mint NFT or release escrow
+    console.log("Fiat payment confirmed:", session.id);
+  }
+
+  res.sendStatus(200);
+});
+
+app.listen(4000, () => console.log("Backend running"));
