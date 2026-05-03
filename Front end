@@ -1,0 +1,6 @@
+/pages
+  index.js
+  marketplace.js
+  create.js
+  dashboard.js   ← private portal
+  nft/[id].js
