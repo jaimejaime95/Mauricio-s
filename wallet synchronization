@@ -1,0 +1,16 @@
+async function syncWallet() {
+  const accounts = await window.ethereum.request({
+    method: "eth_requestAccounts"
+  });
+
+  const wallet = accounts[0];
+
+  const res = await fetch("/api/sync-nfts", {
+    method: "POST",
+    body: JSON.stringify({ wallet }),
+    headers: { "Content-Type": "application/json" }
+  });
+
+  const data = await res.json();
+  console.log("Imported NFTs:", data);
+}
