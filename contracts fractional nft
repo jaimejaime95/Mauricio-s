@@ -1,0 +1,23 @@
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+
+contract FractionalNFT is ERC1155 {
+
+    struct Asset {
+        address creator;
+        uint256 totalShares;
+    }
+
+    mapping(uint256 => Asset) public assets;
+
+    constructor() ERC1155("https://api.mauricios.io/meta/{id}.json") {}
+
+    function mintFraction(
+        uint256 id,
+        uint256 shares
+    ) external {
+        assets[id] = Asset(msg.sender, shares);
+        _mint(msg.sender, id, shares, "");
+    }
+}
