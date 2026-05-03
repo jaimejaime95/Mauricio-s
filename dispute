@@ -1,0 +1,48 @@
+pragma solidity ^0.8.20;
+
+contract DisputeDAO {
+
+    enum Status { Pending, BuyerWins, SellerWins }
+
+    struct Dispute {
+        address buyer;
+        address seller;
+        uint256 amount;
+        uint256 votesForBuyer;
+        uint256 votesForSeller;
+        Status status;
+    }
+
+    mapping(uint256 => Dispute) public disputes;
+    uint256 public disputeCount;
+
+    function createDispute(address seller, uint256 amount) external {
+        disputes[disputeCount] = Dispute(
+            msg.sender,
+            seller,
+            amount,
+            0,
+            0,
+            Status.Pending
+        );
+        disputeCount++;
+    }
+
+    function voteBuyer(uint256 id) external {
+        disputes[id].votesForBuyer++;
+    }
+
+    function voteSeller(uint256 id) external {
+        disputes[id].votesForSeller++;
+    }
+
+    function resolve(uint256 id) external {
+        Dispute storage d = disputes[id];
+
+        if (d.votesForBuyer > d.votesForSeller) {
+            d.status = Status.BuyerWins;
+        } else {
+            d.status = Status.SellerWins;
+        }
+    }
+}
