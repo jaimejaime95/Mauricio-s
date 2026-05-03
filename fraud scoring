@@ -1,0 +1,8 @@
+function calculateTrustScore(user) {
+  let score = 100;
+  if (user.disputes > 3) score -= 30;
+  if (user.failedTxs > 2) score -= 20;
+  if (user.accountAge < 7) score -= 15;
+  if (user.verified) score += 10;
+  return Math.max(0, Math.min(100, score));
+}
